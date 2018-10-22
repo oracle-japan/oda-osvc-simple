@@ -1,0 +1,23 @@
+# RightNow にアクセスするための情報を記述
+
+# 使い方
+# 1. このファイルを複製し、同じディレクトリに ".env" という名前で配置
+# 2. 使用している環境の値に書き換える
+
+# ホスト名
+RN_HOSTNAME="sample.rightnowdemo.com"
+
+# インタフェース名
+RN_INTERFACE="sample"
+
+# ユーザー名
+RN_USERNAME="Admin1"
+
+# パスワード
+RN_PASSWORD="Welcome"
+
+# Application Identified
+RN_APP_ID="SAMPLE_CLIENT"
+
+# Usr IP Address
+RN_USER_ADDRESS="10.0.0.0"
