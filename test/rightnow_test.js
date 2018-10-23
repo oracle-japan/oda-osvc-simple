@@ -1,16 +1,19 @@
-const conn = require('../components/RightNowConnector');
+'use strict';
+
+const conn = require('../components/rightnow');
 
 const test = async () => {
   try {
-    if (!conn.initilized) {
+    if (!conn.isInitialized()) {
       await conn.prepareClient();
     }
     const response1 = await conn.startIntaraction();
     const sessionToken = response1[0].SessionToken;
+    console.log(sessionToken)
 
     // const response2 = await conn.getPopularContent(sessionToken, 'hotel_okada');
     // console.log(response2[0].ContentListResponse.SummaryContents.SummaryContentList);
-    //
+
     const response3 = await conn.getSmartAssistantSearch(sessionToken, 'ATMはありますか', 'hotel_okada')
     console.log(JSON.stringify(response3[0].ContentListResponse.SummaryContents.SummaryContentList[0]));
 

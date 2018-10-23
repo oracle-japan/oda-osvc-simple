@@ -1,3 +1,5 @@
+'use strict';
+
 require('dotenv').config();
 
 // 環境固有の値の読み込み
@@ -13,13 +15,17 @@ const RN_DEFAULT_CATEGORY = process.env.RN_DEFAULT_CATEGORY;
 // パッケージの読み込み
 const soap    = require('soap');
 const request = require('request');
-const debug   = require('debug')('RightNowConnector');
+const debug   = require('debug')('RightNow');
 
 class RightNowConnector {
 
   constructor() {
     debug(`constructor`);
     this.initialized = false;
+  }
+
+  isInitialized() {
+    return this.initialized;
   }
 
   async prepareClient() {
