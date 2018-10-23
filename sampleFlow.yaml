@@ -1,0 +1,154 @@
+metadata:
+  platformVersion: 1.0
+main: true
+name: SampleFAQBot
+context:
+  variables:
+    token: "string"
+    product: "string"
+    category: "string"
+    question: "string"
+    answers: "string"
+    contentId: "string"
+    contentTitle: "string"
+    contentDetail: "string"
+defaultTransitions:
+  error: "defaultErrorHandler"
+states:
+  start:
+    component: "System.List"
+    properties:
+      prompt: "こんにちは。"
+      options:
+      - label: "1. よくある質問とその回答を参照する"
+        keyword: "1"
+        value: "popularContent"
+      - label: "2. 質問する"
+        keyword: "2"
+        value: "smartAssistantSearch"
+    transitions:
+      actions:
+        popularContent: "prepareGetPopularContent"
+        smartAssistantSearch: "prepareSmartAssistantSearch"
+  ##############################################################################
+  # よくある質問とその回答を参照する
+  ##############################################################################
+  # 変数をリセット
+  prepareGetPopularContent:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "answers, contentId, contentTitle, contentDetail"
+    transitions:
+      next: "promptPopularContent"
+  # プロンプトを表示
+  promptPopularContent:
+    component: "System.Output"
+    properties:
+      text: "よくある質問とその回答を表示します。少々お待ちください。"
+      keepTurn: true
+    transitions:
+      next: "getPopularContent"
+  # RightNow からよく参照される質問を取得
+  getPopularContent:
+    component: "rightnow.gettingstarted.PopularContent"
+    properties:
+      token: "token"
+      answers: "answers"
+    transitions:
+      actions:
+        success: "renderingAnswers"
+        failure: "defaultErrorHandler"
+  ##############################################################################
+  # 質問をする
+  ##############################################################################
+  # 変数をリセット
+  prepareSmartAssistantSearch:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "question, answers, contentId, contentTitle, contentDetail"
+    transitions:
+      next: "inputQuestion"
+  # 質問を入力してもらう
+  inputQuestion:
+    component: "System.Text"
+    properties:
+      prompt: "ご質問をどうぞ。"
+      variable: "question"
+    transitions:
+      next: "getSmartAssistantSearch"
+  # RightNow で検索
+  getSmartAssistantSearch:
+    component: "rightnow.gettingstarted.SmartAssistant"
+    properties:
+      token: "token"
+      question: "question"
+      answers: "answers"
+    transitions:
+      actions:
+        success: "renderingAnswers"
+        failure: "defaultErrorHandler"
+  ##############################################################################
+  # 検索結果をカード形式で表示する
+  ##############################################################################
+  renderingAnswers:
+    component: "System.CommonResponse"
+    properties:
+      processUserMessage: true
+      metadata:
+        responseItems:
+        - type: "cards"
+          cardLayout: "horizontal"
+          cards:
+          - title: "${answers.title}"
+            description: "${answers.excerpt}"
+            iteratorVariable: "answers"
+            rangeStart: 0
+            rangeSize: 5
+            actions:
+            - label: "回答を見る"
+              type: "postback"
+              payload:
+                action: "getContentDetail"
+                variables:
+                  contentId: "${answers.content_id}"
+    transitions:
+      actions:
+        getContentDetail: "getContentDetail"
+  ##############################################################################
+  # 選択したコンテンツの詳細を表示
+  ##############################################################################
+  getContentDetail:
+    component: "rightnow.gettingstarted.ContentDetail"
+    properties:
+      token: "token"
+      contentId: "contentId"
+      contentTitle: "contentTitle"
+      contentDetail: "contentDetail"
+    transitions:
+      actions:
+        success: "renderContentDetail"
+        failure: "defaultErrorHandler"
+  renderContentDetail:
+    component: "System.CommonResponse"
+    properties:
+      processUserMessage: false
+      keepTurn: false
+      metadata:
+        responseItems:
+        - type: "text"
+          text: "${contentTitle}"
+          separateBubbles: false
+        - type: "text"
+          text: "${contentDetail}"
+          separateBubbles: false
+    transitions:
+      return: "done"
+  ##############################################################################
+  # エラーが発生したときのメッセージ
+  ##############################################################################
+  defaultErrorHandler:
+    component: "System.Output"
+    properties:
+      text: "体調が悪いので早退します。"
+    transitions:
+      return: "error"

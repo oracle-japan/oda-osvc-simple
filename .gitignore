@@ -1,0 +1,11 @@
+# Dependency directories
+node_modules/
+
+# REPL history
+.node_repl_history
+
+# dotenv environment variables file
+.env
+
+# Archive Files
+*.zip
